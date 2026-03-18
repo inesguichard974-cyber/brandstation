@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palette de Couleurs - Thé</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #333;
+            --text-sub: #888;
+            --gold: #d4af37;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { color: var(--text-main); margin-bottom: 30px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+        .card.grand-cru {
+            border: 2px solid var(--gold);
+        }
+        .color-block {
+            height: 120px;
+            width: 100%;
+        }
+        .info {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .grand-cru-label {
+            font-size: 10px;
+            font-weight: bold;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+        .name {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text-main);
+        }
+        .type {
+            font-size: 12px;
+            color: var(--text-sub);
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            width: fit-content;
+        }
+        .hex-box {
+            margin-top: 10px;
+            background: #f9f9f9;
+            padding: 8px;
+            text-align: center;
+            border-radius: 6px;
+            font-family: monospace;
+            font-weight: bold;
+            color: #555;
+            border: 1px solid #eee;
+        }
+        /* Toast notification */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 14px;
+        }
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+    </style>
+</head>
+<body>
+
+    <h1>Nuancier de Couleurs</h1>
+    <div class="grid" id="colorGrid"></div>
+    <div id="toast">Code copié !</div>
+
+    <script>
+        const couleurs = [{"nom": "Th\u00e9 blanc", "type": "BLANC", "hex": "#FEFEFE", "grand_cru": false}, {"nom": "Ti bois blanc", "type": "BLANC", "hex": "#C3C5BE", "grand_cru": false}, {"nom": "Vanille", "type": "BLANC", "hex": "#AF8853", "grand_cru": false}, {"nom": "Eucalyptus citronnelle", "type": "BLANC", "hex": "#008793", "grand_cru": false}, {"nom": "Citronnelle", "type": "BLANC", "hex": "#C0C950", "grand_cru": false}, {"nom": "G\u00e9ranium citronnelle", "type": "BLANC", "hex": "#E6C1CC", "grand_cru": false}, {"nom": "Gingembre", "type": "BLANC", "hex": "#EFB45D", "grand_cru": false}, {"nom": "Galabert", "type": "BLANC", "hex": "#CA1827", "grand_cru": false}, {"nom": "Menthe", "type": "BLANC", "hex": "#169F53", "grand_cru": false}, {"nom": "G\u00e9ranium rosat", "type": "BLANC", "hex": "#C13C88", "grand_cru": false}, {"nom": "Verveine", "type": "BLANC", "hex": "#958F56", "grand_cru": false}, {"nom": "Cannelle", "type": "BLANC", "hex": "#AB381F", "grand_cru": false}, {"nom": "Th\u00e9 vert", "type": "VERT", "hex": "#18472B", "grand_cru": false}, {"nom": "Curcuma", "type": "VERT", "hex": "#EA9021", "grand_cru": false}, {"nom": "Combava", "type": "VERT", "hex": "#A9C648", "grand_cru": false}, {"nom": "Ananas", "type": "VERT", "hex": "#F8F5A5", "grand_cru": false}, {"nom": "Verti'z", "type": "VERT", "hex": "#132320", "grand_cru": false}, {"nom": "Gingembre Mangue", "type": "VERT", "hex": "#E5AC60", "grand_cru": false}, {"nom": "Menthe Marocaine", "type": "VERT", "hex": "#049F4D", "grand_cru": false}, {"nom": "La bris\u00e9e", "type": "VERT", "hex": "#B380A8", "grand_cru": false}, {"nom": "Piment", "type": "VERT", "hex": "#EA252A", "grand_cru": false}, {"nom": "Th\u00e9 noir des remparts", "type": "NOIR", "hex": "#070B0C", "grand_cru": true}, {"nom": "bande th\u00e9 blanc", "type": "BLANC", "hex": "#FBFADA", "grand_cru": false}, {"nom": "Bande th\u00e9 vert", "type": "VERT", "hex": "#009232", "grand_cru": false}, {"nom": "Bande grand cru", "type": "NOIR", "hex": "#B2984F", "grand_cru": false}, {"nom": "Th\u00e9 blanc", "type": "BLANC", "hex": "#E5E7DF", "grand_cru": true}, {"nom": "TH\u00c9 VERT", "type": "VERT", "hex": "#053716", "grand_cru": true}, {"nom": "Citron", "type": "VERT", "hex": "#E2E600", "grand_cru": false}];
+
+        const grid = document.getElementById('colorGrid');
+        const toast = document.getElementById('toast');
+
+        couleurs.forEach(item => {
+            const card = document.createElement('div');
+            card.className = `card ${item.grand_cru ? 'grand-cru' : ''}`;
+            
+            card.innerHTML = `
+                <div class="color-block" style="background-color: ${item.hex}"></div>
+                <div class="info">
+                    ${item.grand_cru ? '<span class="grand-cru-label">✨ GRAND CRU</span>' : ''}
+                    <span class="name">${item.nom}</span>
+                    <span class="type">${item.type}</span>
+                    <div class="hex-box">${item.hex}</div>
+                </div>
+            `;
+
+            card.onclick = () => {
+                navigator.clipboard.writeText(item.hex).then(() => {
+                    toast.innerText = `Copié : ${item.hex}`;
+                    toast.className = "show";
+                    setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+                });
+            };
+
+            grid.appendChild(card);
+        });
+    </script>
+</body>
+</html>
