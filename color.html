@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+
+<link rel="apple-touch-icon" href="images/favicon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Couleur - Le Labyrinthe</title>
+    <style>
+        :root {
+            --primary: #27ae60;
+            --noir: #2c3e50;
+            --blanc: #f9f9f9;
+            --vert: #27ae60;
+            --gold: #d4af37;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        /* Formulaire d'ajout */
+        .add-tool {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            align-items: end;
+            background: #eef2f3;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        
+        input, select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        button.btn-add {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Grille de couleurs */
+        .palette-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: 0.3s;
+        }
+
+        .card:hover { transform: translateY(-5px); }
+
+        .swatch {
+            height: 120px;
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .btn-delete {
+            background: rgba(255,255,255,0.8);
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: #e74c3c;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-body { padding: 15px; }
+        .card-body h3 { margin: 0 0 5px 0; font-size: 1.1em; }
+        .type-badge {
+            font-size: 11px;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #eee;
+        }
+
+        /* Style Grand Cru */
+        .grand-cru-border { border: 2px solid var(--gold); }
+        .grand-cru-label {
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .hex-display {
+            display: block;
+            margin-top: 10px;
+            font-family: monospace;
+            background: #f8f8f8;
+            padding: 4px;
+            text-align: center;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🎨 Studio Colorimétrique - Le Labyrinthe</h1>
+        <p>Gérez les nuances de vos gammes : Vert, Noir et Blanc.</p>
+        
+        <div class="add-tool">
+            <div class="input-group">
+                <label>Nom du Produit</label>
+                <input type="text" id="pName" placeholder="ex: Thé Vert Curcuma">
+            </div>
+            <div class="input-group">
+                <label>Type de Thé</label>
+                <select id="pType">
+                    <option value="Vert">Thé Vert</option>
+                    <option value="Noir">Thé Noir</option>
+                    <option value="Blanc">Thé Blanc</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Couleur</label>
+                <input type="color" id="pColor" value="#27ae60" style="height: 40px; width: 100%;">
+            </div>
+            <div class="input-group">
+                <label style="display: flex; align-items: center; gap: 5px;">
+                    <input type="checkbox" id="pGrandCru"> Grand Cru
+                </label>
+            </div>
+            <button class="btn-add" onclick="addColor()">Ajouter à la Gamme</button>
+        </div>
+    </header>
+
+    <div class="palette-grid" id="grid"></div>
+</div>
+
+<script>
+    // Chargement initial des données basées sur vos documents
+    let myColors = JSON.parse(localStorage.getItem('teaPalette')) || [
+        { name: "Thé Noir des Remparts", type: "Noir", color: "#1a1a1a", gc: true },
+        { name: "Thé Vert Curcuma", type: "Vert", color: "#f1c40f", gc: false },
+        { name: "Thé Blanc Vanille", type: "Blanc", color: "#f3e5ab", gc: false },
+        { name: "Thé Blanc Nature", type: "Blanc", color: "#f9f9f9", gc: true }
+    ];
+
+    function save() {
+        localStorage.setItem('teaPalette', JSON.stringify(myColors));
+        render();
+    }
+
+    function addColor() {
+        const name = document.getElementById('pName').value;
+        const type = document.getElementById('pType').value;
+        const color = document.getElementById('pColor').value;
+        const gc = document.getElementById('pGrandCru').checked;
+
+        if(!name) return alert("Nom requis !");
+
+        myColors.push({ name, type, color, gc });
+        save();
+        
+        // Reset form
+        document.getElementById('pName').value = '';
+        document.getElementById('pGrandCru').checked = false;
+    }
+
+    function deleteColor(index) {
+        if(confirm("Supprimer cette couleur de la charte ?")) {
+            myColors.splice(index, 1);
+            save();
+        }
+    }
+
+    function render() {
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '';
+
+        myColors.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = `card ${item.gc ? 'grand-cru-border' : ''}`;
+            
+            card.innerHTML = `
+                <div class="swatch" style="background-color: ${item.color}">
+                    <button class="btn-delete" onclick="deleteColor(${index})">×</button>
+                </div>
+                <div class="card-body">
+                    ${item.gc ? '<span class="grand-cru-label">✨ Grand Cru</span>' : ''}
+                    <h3>${item.name}</h3>
+                    <span class="type-badge">${item.type}</span>
+                    <span class="hex-display">${item.color.toUpperCase()}</span>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    // Premier affichage
+    render();
+</script>
+
+</body>
+</html>

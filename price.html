@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ariane Studio - Édition Complète IG</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        :root {
+            --primary: #27ae60; --bg-app: #f1f5f9;
+            --tag-w: 70mm; --tag-h: 30mm; --zoom: 1;
+            /* Tailles par défaut pilotées par JS */
+            --fs-cat: 10pt; --fs-prod: 13pt; --fs-legal: 5pt; --fs-price: 15.5pt; --fs-unit: 5.8pt;
+        }
+
+        * { box-sizing: border-box; -webkit-print-color-adjust: exact; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; background: var(--bg-app); color: #1e293b; display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: 360px; background: white; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; z-index: 100; box-shadow: 2px 0 10px rgba(0,0,0,0.05); }
+        .sidebar-header { padding: 15px; border-bottom: 1px solid #f1f5f9; text-align: center; }
+        .sidebar-header h1 { font-size: 1.1rem; margin: 0; color: var(--primary); letter-spacing: 2px; text-transform: uppercase; font-weight: 800; }
+        .nav-content { padding: 10px; overflow-y: auto; flex-grow: 1; }
+        .group { margin-bottom: 12px; padding: 10px; background: #fff; border-radius: 10px; border: 1px solid #edf2f7; }
+        .group-title { font-size: 9px; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 8px; display: block; border-bottom: 1px solid #f1f5f9; padding-bottom: 3px; }
+        
+        .btn { width: 100%; padding: 8px; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; transition: 0.1s; font-size: 11px; margin-bottom: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-main { background: var(--primary); color: white; }
+        .btn-save { background: #3498db; color: white; }
+        .btn-add { background: #8e44ad; color: white; }
+        .btn-sec { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+
+        .slider-wrap { margin-bottom: 6px; }
+        .slider-wrap label { font-size: 9.5px; font-weight: 600; display: block; color: #64748b; }
+        input[type="text"], input[type="range"] { width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 12px; margin-bottom: 5px; }
+
+        /* --- WORKSPACE --- */
+        .main-canvas { flex-grow: 1; display: flex; flex-direction: column; }
+        .workspace { flex-grow: 1; overflow: auto; padding: 40px; background: #cbd5e1; display: flex; justify-content: center; position: relative; }
+        .labels-grid { display: grid; grid-template-columns: repeat(auto-fill, calc(var(--tag-w) + 65px)); gap: 20px; transform: scale(var(--zoom)); transform-origin: top center; }
+
+        /* --- L'ÉTIQUETTE --- */
+        .tag-wrapper { display: flex; gap: 10px; align-items: flex-start; break-inside: avoid; page-break-inside: avoid; }
+        .tag-sidebar-ctrl { display: flex; flex-direction: column; gap: 4px; background: #fff; padding: 6px; border-radius: 6px; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .ctrl-btn { width: 24px; height: 24px; font-size: 11px; font-weight: bold; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 4px; }
+        .tag-sidebar-ctrl input[type="color"] { width: 24px; height: 24px; border: none; cursor: pointer; padding: 0; background: none; }
+
+        .price-tag {
+            width: var(--tag-w); height: var(--tag-h); background: #fff;
+            position: relative; overflow: hidden; display: flex; flex-direction: column;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 0.1mm solid #ddd;
+            --txt-cat-col: black; --txt-prod-col: black;
+        }
+        .tag-wrapper:not(.selected) { opacity: 0.25; filter: grayscale(1); }
+
+        .tag-bg-color { position: absolute; inset: 0; background-color: var(--bg-col, #ffffff); z-index: 1; }
+        .tag-pattern { position: absolute; inset: 0; background-image: url('images/fond-motif.png'); background-size: cover; opacity: 0.22; z-index: 2; display: none; pointer-events: none; }
+        .price-tag.show-pattern .tag-pattern { display: block; }
+        .tag-inner { position: relative; z-index: 10; width: 100%; height: 100%; display: flex; flex-direction: column; }
+        .price-tag.show-lisere .tag-inner { border: 0.3mm solid #000; margin: 1.1mm; width: calc(100% - 2.2mm); height: calc(100% - 2.4mm); border-radius: 0.8mm; }
+
+        .tag-header { height: 9.5mm; width: 100%; background-color: var(--header-col, #ffffff); display: flex; align-items: center; justify-content: center; border-bottom: 0.25mm solid #000; color: var(--txt-cat-col); }
+        .tag-header span { font-size: var(--fs-cat); font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; outline: none; text-align: center; }
+        .tag-body { flex-grow: 1; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1mm 2mm; color: var(--txt-prod-col); }
+        .tag-prod { font-size: var(--fs-prod); font-weight: 800; text-transform: uppercase; outline: none; line-height: 1; }
+        .tag-footer { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 3mm 2.2mm 3mm; color: var(--txt-prod-col); }
+        .tag-legal { font-size: var(--fs-legal); font-weight: 700; text-transform: uppercase; outline: none; opacity: 0.9; }
+        .tag-price-box { text-align: right; line-height: 1; display: flex; flex-direction: column; align-items: flex-end; }
+        .tag-price-val { font-size: var(--fs-price); font-weight: 1000; outline: none; }
+        .tag-price-unit { font-size: var(--fs-unit); font-weight: 800; outline: none; margin-top: 3px; opacity: 0.9; }
+
+        @media print {
+            .sidebar, .top-bar, .tag-sidebar-ctrl { display: none !important; }
+            body, .workspace { background: white !important; overflow: visible !important; display: block !important; padding: 0 !important; }
+            .labels-grid { transform: none !important; display: block !important; gap: 0 !important; padding-top: 25mm; }
+            .tag-wrapper { float: left; margin: 0 !important; gap: 0 !important; break-inside: avoid; }
+            .tag-wrapper:not(.selected) { display: none !important; }
+            .price-tag { box-shadow: none !important; border: 0.1mm solid #000 !important; border-radius: 0 !important; }
+            @page { margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header"><h1>ARIANE STUDIO</h1></div>
+    <div class="nav-content">
+        <div class="group">
+            <span class="group-title">1. Catalogue & Sauvegarde</span>
+            <input type="file" id="csvIn" style="display:none" accept=".csv">
+            <button class="btn btn-main" onclick="document.getElementById('csvIn').click()">Importer (CSV)</button>
+            <div style="display:flex; gap:5px;">
+                <button class="btn btn-save" style="flex:1" onclick="saveAll()">Sauvegarder</button>
+                <button class="btn btn-sec" style="flex:1" onclick="loadAll()">Restaurer</button>
+            </div>
+        </div>
+
+        <div class="group">
+            <span class="group-title">2. Sélection & Ajout</span>
+            <button class="btn btn-add" onclick="createEmptyTag()">+ Ajouter étiquette vide</button>
+            <div style="display:flex; gap:5px;">
+                <button class="btn btn-sec" style="flex:1" onclick="bulkSelect(true)">Tout cocher</button>
+                <button class="btn btn-sec" style="flex:1" onclick="bulkSelect(false)">Tout décocher</button>
+            </div>
+        </div>
+
+        <div class="group">
+            <span class="group-title">3. Édition par Mot-Clé (Couleurs)</span>
+            <input type="text" id="kwFilter" placeholder="Mot cible (ex: Rosat)">
+            <div style="display:flex; gap:5px; margin-bottom:5px;">
+                <div style="flex:1; font-size:8px;">Barre: <input type="color" id="fHCol" value="#ffffff" style="width:100%"></div>
+                <div style="flex:1; font-size:8px;">Fond: <input type="color" id="fBCol" value="#ffffff" style="width:100%"></div>
+            </div>
+            <button class="btn btn-filter" onclick="applyBatchFiltre('header')">Colorer BARRES</button>
+            <button class="btn btn-filter" onclick="applyBatchFiltre('bg')">Colorer FONDS</button>
+        </div>
+
+        <div class="group">
+            <span class="group-title">4. Rechercher & Remplacer</span>
+            <input type="text" id="findTxt" placeholder="Chercher...">
+            <input type="text" id="repTxt" placeholder="Remplacer par...">
+            <button class="btn btn-main" style="background:#3498db" onclick="globalSearchReplace()">Appliquer partout</button>
+        </div>
+
+        <div class="group">
+            <span class="group-title">5. Tailles Globales (Ecritures)</span>
+            <div class="slider-wrap"><label>Titre (Bandeau)</label><input type="range" min="6" max="15" step="0.5" value="10" oninput="document.documentElement.style.setProperty('--fs-cat', this.value + 'pt')"></div>
+            <div class="slider-wrap"><label>Produit (Saveur)</label><input type="range" min="8" max="22" step="0.5" value="13" oninput="document.documentElement.style.setProperty('--fs-prod', this.value + 'pt')"></div>
+            <div class="slider-wrap"><label>Infos (Légal)</label><input type="range" min="3" max="10" step="0.5" value="5" oninput="document.documentElement.style.setProperty('--fs-legal', this.value + 'pt')"></div>
+            <div class="slider-wrap"><label>Prix (€)</label><input type="range" min="10" max="25" step="0.5" value="15.5" oninput="document.documentElement.style.setProperty('--fs-price', this.value + 'pt')"></div>
+            <div class="slider-wrap"><label>Unité (€/kg)</label><input type="range" min="3" max="10" step="0.5" value="5.8" oninput="document.documentElement.style.setProperty('--fs-unit', this.value + 'pt')"></div>
+        </div>
+
+        <div class="group">
+            <span class="group-title">6. Style Global</span>
+            <button id="togL" class="btn btn-sec" onclick="globalStyleToggle('show-lisere', this)">Liseré Noir : OFF</button>
+            <button id="togP" class="btn btn-sec" onclick="globalStyleToggle('show-pattern', this)">Motif Feuilles : OFF</button>
+            <input type="range" min="0.5" max="3" step="0.1" value="1" oninput="document.documentElement.style.setProperty('--zoom', this.value)">
+        </div>
+
+        <button class="btn btn-main" onclick="window.print()" style="background:#10b981; height:45px; font-size:14px;">IMPRIMER PLANCHE</button>
+    </div>
+</div>
+
+<div class="main-canvas">
+    <div class="workspace">
+        <div id="grid" class="labels-grid"></div>
+    </div>
+</div>
+
+<script>
+    const COLORS_DICT = { 'ROSAT': '#C13C88', 'COMBAVA': '#A9C648', 'VANILLE': '#AF8853', 'CITRONNELLE': '#C0C950', 'GINGEMBRE': '#EFB45D', 'PIMENT': '#EA252A', 'MENTHE': '#169F53', 'VERT': '#18472B', 'NOIR': '#070B0C' };
+
+    function singularize(t) {
+        if(!t) return "";
+        return t.toString().toUpperCase().replace(/THÉS/g, 'THÉ').replace(/BLANCS/g, 'BLANC').replace(/VERTS/g, 'VERT').replace(/NOIRS/g, 'NOIR').replace(/GRANDS CRUS/g, 'GRAND CRU').replace(/S$/g, '');
+    }
+
+    function cleanName(t) {
+        if(!t) return "";
+        return t.toString().toUpperCase().replace(/^(TB|TV|TN|BC)\s+/g, '').replace(/\bNATURE\b/g, '').trim();
+    }
+
+    function globalSearchReplace() {
+        const f = document.getElementById('findTxt').value;
+        const r = document.getElementById('repTxt').value;
+        if(!f) return;
+        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            if(el.innerText.includes(f)) el.innerText = el.innerText.split(f).join(r);
+        });
+    }
+
+    function applyBatchFiltre(mode) {
+        const kw = document.getElementById('kwFilter').value.toUpperCase();
+        if(!kw) return;
+        document.querySelectorAll('.tag-wrapper').forEach(w => {
+            if(w.querySelector('.tag-prod').innerText.includes(kw) || w.querySelector('.tag-header span').innerText.includes(kw)) {
+                if(mode === 'header') w.querySelector('.price-tag').style.setProperty('--header-col', document.getElementById('fHCol').value);
+                if(mode === 'bg') w.querySelector('.price-tag').style.setProperty('--bg-col', document.getElementById('fBCol').value);
+            }
+        });
+    }
+
+    function toggleTextCol(btn, varName) {
+        const tag = btn.closest('.tag-wrapper').querySelector('.price-tag');
+        const cur = tag.style.getPropertyValue(varName) || 'black';
+        tag.style.setProperty(varName, cur === 'black' ? 'white' : 'black');
+    }
+
+    function globalStyleToggle(cls, btn) {
+        const grid = document.getElementById('grid');
+        const active = grid.classList.toggle(cls);
+        document.querySelectorAll('.price-tag').forEach(tag => tag.classList.toggle(cls, active));
+        btn.innerText = (active ? cls.replace('show-','').toUpperCase() + " : ON" : cls.replace('show-','').toUpperCase() + " : OFF");
+        btn.classList.toggle('active', active);
+    }
+
+    function bulkSelect(s) {
+        document.querySelectorAll('.tag-wrapper').forEach(w => {
+            w.classList.toggle('selected', s);
+            w.querySelector('.tag-check').checked = s;
+        });
+    }
+
+    function changeFontSize(btn, cls, delta) {
+        const el = btn.closest('.tag-wrapper').querySelector('.' + cls);
+        let current = parseFloat(window.getComputedStyle(el).fontSize);
+        el.style.fontSize = (current + delta) + 'px';
+    }
+
+    function duplicateLabel(btn) {
+        const tag = btn.closest('.tag-wrapper').querySelector('.price-tag');
+        createTag(
+            tag.querySelector('.tag-header span').innerText,
+            tag.querySelector('.tag-prod').innerText,
+            tag.querySelector('.tag-legal').innerHTML,
+            tag.querySelector('.tag-price-val').innerText,
+            tag.querySelector('.tag-price-unit').innerText,
+            tag.style.getPropertyValue('--bg-col'),
+            tag.style.getPropertyValue('--header-col')
+        );
+    }
+
+    function createEmptyTag() {
+        createTag('CATEGORIE', 'NOUVEAU PRODUIT', 'FORMAT<br>GRAND COUDE', '0,00 €', '', '#ffffff', '#ffffff');
+    }
+
+    const SAVE_KEY = 'ARIANE_FINAL_DATA_PERSISTENT';
+    function saveAll() {
+        const data = [];
+        document.querySelectorAll('.tag-wrapper').forEach(w => {
+            const tag = w.querySelector('.price-tag');
+            data.push({
+                cat: tag.querySelector('.tag-header span').innerText, prod: tag.querySelector('.tag-prod').innerText,
+                legal: tag.querySelector('.tag-legal').innerHTML, price: tag.querySelector('.tag-price-val').innerText,
+                unit: tag.querySelector('.tag-price-unit').innerText, bg: tag.style.getPropertyValue('--bg-col'),
+                head: tag.style.getPropertyValue('--header-col'), txtCat: tag.style.getPropertyValue('--txt-cat-col'),
+                txtProd: tag.style.getPropertyValue('--txt-prod-col'), sel: w.classList.contains('selected'),
+                fsProd: tag.querySelector('.tag-prod').style.fontSize,
+                fsCat: tag.querySelector('.tag-header span').style.fontSize
+            });
+        });
+        localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+        alert("Modifications sauvegardées !");
+    }
+
+    function loadAll() {
+        const legacyKeys = ['ariane_ig_ultimate', 'ariane_ig_final_v5', 'ariane_ig_contrast', 'ariane_studio_v3', 'ariane_studio_v5'];
+        let raw = localStorage.getItem(SAVE_KEY);
+        if(!raw) {
+            for(let k of legacyKeys) {
+                raw = localStorage.getItem(k);
+                if(raw) break;
+            }
+        }
+        if(!raw) return alert("Aucune sauvegarde trouvée.");
+        const data = JSON.parse(raw);
+        const grid = document.getElementById('grid'); grid.innerHTML = "";
+        data.forEach(item => {
+            const w = createTag(item.cat, item.prod, item.legal, item.price, item.unit, item.bg, item.head, item.sel);
+            const tag = w.querySelector('.price-tag');
+            if(item.txtCat) tag.style.setProperty('--txt-cat-col', item.txtCat);
+            if(item.txtProd) tag.style.setProperty('--txt-prod-col', item.txtProd);
+            if(item.fsProd) tag.querySelector('.tag-prod').style.fontSize = item.fsProd;
+            if(item.fsCat) tag.querySelector('.tag-header span').style.fontSize = item.fsCat;
+        });
+    }
+
+    document.getElementById('csvIn').onchange = function(e) {
+        Papa.parse(e.target.files[0], {
+            header: true, skipEmptyLines: true, delimiter: "",
+            complete: function(res) {
+                const grid = document.getElementById('grid'); grid.innerHTML = "";
+                res.data.forEach(row => {
+                    const keys = Object.keys(row);
+                    const cat = singularize(row[keys[0]] || "");
+                    const prod = cleanName(row[keys[1]] || "");
+                    const prixStr = (row[keys[3]] || "0").toString().replace('€','').replace(',','.').trim();
+                    const prix = parseFloat(prixStr);
+                    const fmt = (row[keys[2]] || "").toLowerCase();
+                    let unitText = "";
+                    if (fmt.includes('g') && !fmt.includes('kg')) {
+                        let val = parseInt(fmt); if(val > 0) unitText = ((prix/val)*1000).toFixed(2).replace('.',',') + " €/kg";
+                    } else if (fmt.includes('kg')) {
+                        let val = parseFloat(fmt); if(val > 0) unitText = (prix/val).toFixed(2).replace('.',',') + " €/kg";
+                    }
+                    let bg = "#ffffff";
+                    for(let k in COLORS_DICT) { if(prod.includes(k)) bg = COLORS_DICT[k]; }
+                    createTag(cat, prod, (row[keys[2]] || "") + "<br>GRAND COUDE", prix.toFixed(2).replace('.',',') + " €", unitText, bg, "#ffffff");
+                });
+            }
+        });
+    };
+
+    function createTag(cat, prod, legal, price, unit, bg, head, sel = true) {
+        const w = document.createElement('div');
+        w.className = "tag-wrapper" + (sel ? " selected" : "");
+        w.innerHTML = `
+            <div class="tag-sidebar-ctrl">
+                <input type="checkbox" ${sel?'checked':''} class="tag-check" onchange="this.closest('.tag-wrapper').classList.toggle('selected', this.checked)">
+                <input type="color" value="${head}" oninput="this.closest('.tag-wrapper').querySelector('.price-tag').style.setProperty('--header-col', this.value)">
+                <input type="color" value="${bg}" oninput="this.closest('.tag-wrapper').querySelector('.price-tag').style.setProperty('--bg-col', this.value)">
+                <button class="ctrl-btn" onclick="toggleTextCol(this, '--txt-cat-col')">A</button>
+                <button class="ctrl-btn" onclick="toggleTextCol(this, '--txt-prod-col')">A</button>
+                <button class="ctrl-btn" onclick="changeFontSize(this, 'tag-prod', 1)">+</button>
+                <button class="ctrl-btn" onclick="changeFontSize(this, 'tag-prod', -1)">-</button>
+                <button class="ctrl-btn" style="background:#d1f2eb" onclick="duplicateLabel(this)" title="Dupliquer">⧉</button>
+            </div>
+            <div class="price-tag" style="--bg-col: ${bg}; --header-col: ${head}">
+                <div class="tag-bg-color"></div><div class="tag-pattern"></div>
+                <div class="tag-inner">
+                    <div class="tag-header"><span contenteditable="true">${cat}</span></div>
+                    <div class="tag-body"><div class="tag-prod" contenteditable="true">${prod}</div></div>
+                    <div class="tag-footer">
+                        <div class="tag-legal" contenteditable="true">${legal}</div>
+                        <div class="tag-price-box">
+                            <span class="tag-price-val" contenteditable="true">${price}</span>
+                            <span class="tag-price-unit" contenteditable="true">${unit}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        document.getElementById('grid').appendChild(w);
+        return w;
+    }
+</script>
+</body>
+</html>

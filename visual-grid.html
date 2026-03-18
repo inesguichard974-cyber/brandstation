@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module Grille Instagram Fonctionnel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Masquer la scrollbar pour faire plus "application native" */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .ig-phone {
+            width: 350px;
+            height: 700px;
+            border: 12px solid #000;
+            border-radius: 40px;
+            background: #fff;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .grid-item {
+            aspect-ratio: 1 / 1;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .grid-item:hover::after {
+            content: '🗑️ Supprimer';
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center gap-12 font-sans">
+
+    <div class="bg-white p-8 rounded-2xl shadow-lg w-96">
+        <h2 class="text-2xl font-bold mb-2">Gestionnaire de Grille</h2>
+        <p class="text-gray-500 text-sm mb-6">Ajoute tes vrais visuels. Ils sont sauvegardés localement sur ton navigateur.</p>
+        
+        <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 transition cursor-pointer" onclick="document.getElementById('imageUpload').click()">
+            <i class="fas fa-cloud-upload-alt text-3xl text-indigo-500 mb-2"></i>
+            <p class="font-semibold text-gray-700">Clique pour ajouter une image</p>
+            <p class="text-xs text-gray-400 mt-1">Format JPG, PNG (Max 2MB)</p>
+            <input type="file" id="imageUpload" class="hidden" accept="image/*" onchange="handleFileUpload(event)">
+        </div>
+
+        <button onclick="clearGrid()" class="mt-6 w-full text-red-500 font-semibold py-2 hover:bg-red-50 rounded-lg transition">
+            <i class="fas fa-trash-alt mr-2"></i> Vider toute la grille
+        </button>
+    </div>
+
+    <div class="ig-phone flex flex-col">
+        <div class="px-4 py-3 flex justify-between items-center border-b border-gray-100">
+            <div class="font-bold text-lg flex items-center gap-1">
+                <i class="fas fa-lock text-xs"></i> MaMarque_Officiel <i class="fas fa-chevron-down text-xs"></i>
+            </div>
+            <div class="flex gap-4 text-xl">
+                <i class="far fa-plus-square"></i>
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+
+        <div class="px-4 py-4 flex items-center gap-6">
+            <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-yellow-400 to-fuchsia-600 p-1 shrink-0">
+                <div class="w-full h-full bg-white rounded-full border-2 border-white overflow-hidden">
+                    <img src="images/logo-labyrinthe.png" alt="Logo Labyrinthe" class="w-full h-full object-cover">
+                </div>
+            </div>
+            <div class="flex gap-4 text-center flex-1">
+                <div><div id="post-count" class="font-bold text-lg">0</div><div class="text-xs">Posts</div></div>
+                <div><div class="font-bold text-lg">10.2k</div><div class="text-xs">Followers</div></div>
+                <div><div class="font-bold text-lg">120</div><div class="text-xs">Suivis</div></div>
+            </div>
+        </div>
+        
+        <div class="px-4 pb-4 text-sm">
+            <div class="font-bold">Ma Marque</div>
+            <div class="text-gray-600">Catégorie de produit</div>
+            <div>Création de valeur et d'outils innovants. 🚀</div>
+            <a href="#" class="text-blue-900 font-semibold">lien.vers/monsite</a>
+        </div>
+
+        <div class="flex border-t border-gray-200">
+            <div class="flex-1 py-2 text-center border-b-2 border-black text-black"><i class="fas fa-th"></i></div>
+            <div class="flex-1 py-2 text-center text-gray-400"><i class="fas fa-play"></i></div>
+            <div class="flex-1 py-2 text-center text-gray-400"><i class="fas fa-user-tag"></i></div>
+        </div>
+
+        <div id="ig-grid" class="grid grid-cols-3 gap-0.5 overflow-y-auto no-scrollbar flex-1 bg-white">
+            </div>
+    </div>
+
+    <script>
+        // Clé pour le stockage local
+        const STORAGE_KEY = 'socialflow_ig_grid';
+        let images = [];
+
+        // Charger les images au démarrage
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedImages = localStorage.getItem(STORAGE_KEY);
+            if (savedImages) {
+                images = JSON.parse(savedImages);
+            }
+            renderGrid();
+        });
+
+        // Fonction pour gérer l'upload d'un vrai fichier
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Utilisation de FileReader pour transformer l'image en données affichables (Base64)
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageBase64 = e.target.result;
+                
+                // Ajouter la nouvelle image au début du tableau (comme sur Instagram)
+                images.unshift(imageBase64);
+                
+                // Sauvegarder et réafficher
+                saveData();
+                renderGrid();
+            };
+            reader.readAsDataURL(file);
+            
+            // Réinitialiser l'input pour pouvoir re-sélectionner le même fichier si besoin
+            event.target.value = '';
+        }
+
+        // Fonction pour supprimer une image
+        function deleteImage(index) {
+            if(confirm("Veux-tu vraiment retirer ce post de la grille ?")) {
+                images.splice(index, 1);
+                saveData();
+                renderGrid();
+            }
+        }
+
+        // Fonction pour vider toute la grille
+        function clearGrid() {
+            if(confirm("Attention, cela va vider toute ta grille. Continuer ?")) {
+                images = [];
+                saveData();
+                renderGrid();
+            }
+        }
+
+        // Sauvegarder dans le navigateur
+        function saveData() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(images));
+            } catch (e) {
+                alert("Erreur de sauvegarde : l'image est peut-être trop lourde. Essaie de la compresser.");
+            }
+        }
+
+        // Afficher la grille
+        function renderGrid() {
+            const gridEl = document.getElementById('ig-grid');
+            const countEl = document.getElementById('post-count');
+            
+            gridEl.innerHTML = '';
+            countEl.innerText = images.length;
+
+            if (images.length === 0) {
+                gridEl.innerHTML = '<div class="col-span-3 text-center text-gray-400 py-10 text-sm">Aucun post. Ajoute une image.</div>';
+                return;
+            }
+
+            // Générer le HTML pour chaque image
+            images.forEach((imgSrc, index) => {
+                const div = document.createElement('div');
+                div.className = 'grid-item';
+                div.style.backgroundImage = `url(${imgSrc})`;
+                div.onclick = () => deleteImage(index);
+                gridEl.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
