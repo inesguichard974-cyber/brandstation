@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studio Étiquettes 50x40 - Sécurité Impression</title>
+    <title>Studio Étiquettes 50x40 - Version Finale</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
             --beige-bande: #f2ede2;
@@ -11,11 +12,7 @@
             --lbl-h: 40mm;
         }
 
-        /* --- CONFIGURATION IMPRESSION --- */
-        @page {
-            size: A4;
-            margin: 10mm; /* Marge de sécurité pour éviter que l'imprimante ne coupe */
-        }
+        @page { size: A4; margin: 10mm; }
 
         body {
             margin: 0; font-family: 'Arial', sans-serif;
@@ -35,10 +32,14 @@
         .input-group label { font-size: 0.75rem; font-weight: bold; color: #555; }
         .input-group select, .input-group input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
 
-        .btn-print {
-            background: #27ae60; color: white; border: none; padding: 12px;
-            border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px;
+        .btn-action {
+            border: none; padding: 12px; border-radius: 6px; 
+            font-weight: bold; cursor: pointer; margin-top: 5px; color: white;
+            transition: opacity 0.2s;
         }
+        .btn-action:hover { opacity: 0.9; }
+        .btn-print { background: #27ae60; }
+        .btn-download { background: #2980b9; }
 
         .warning-box {
             background: #e7f3ff; color: #0c5460; padding: 10px; font-size: 0.75rem;
@@ -55,8 +56,8 @@
 
         /* --- L'ÉTIQUETTE --- */
         .label-container {
-            width: var(--lbl-w) !important;
-            height: var(--lbl-h) !important;
+            width: var(--lbl-w);
+            height: var(--lbl-h);
             background-color: white;
             background-image: url("FOND THE BLANC...-0001.jpg");
             background-size: cover;
@@ -71,68 +72,70 @@
         }
 
         .logo-main {
-            width: 13mm; margin: 1.5mm auto 0.5mm auto; display: block;
-            filter: brightness(0.8) contrast(1.3);
+            width: 13.5mm; margin: 1.2mm auto 0.3mm auto; display: block;
+            filter: brightness(0.7) contrast(1.4);
         }
 
         .title-band {
             background-color: var(--beige-bande) !important;
-            width: 100%; padding: 1.2mm 0; text-align: center;
+            width: 100%; padding: 1.3mm 0; text-align: center;
             border-top: 0.1mm solid rgba(0,0,0,0.1); border-bottom: 0.1mm solid rgba(0,0,0,0.1);
         }
 
-        .product-title { color: #000 !important; font-size: 8pt; font-weight: 900; margin: 0; text-transform: uppercase; }
+        .product-title { color: #000 !important; font-size: 8.5pt; font-weight: 900; margin: 0; text-transform: uppercase; }
 
         .ingredients {
-            flex-grow: 1; padding: 0.5mm 3mm; text-align: center;
-            font-size: 5.2pt; line-height: 1.2; color: #000;
+            flex-grow: 1; padding: 0.5mm 3.5mm; text-align: center;
+            font-size: 5.4pt;
+            line-height: 1.2; color: #1a1a1a;
             display: flex; align-items: center; justify-content: center;
         }
 
-        .footer-area { padding: 0 2mm 1.5mm 2mm; }
+        .footer-area { padding: 0 2.2mm 1.5mm 2.2mm; }
         .baf-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.8mm; }
         .logo-baf { height: 6mm; }
-        .certif-block { text-align: right; font-size: 3.8pt; line-height: 1.1; color: #000; }
+        
+        .certif-block { 
+            text-align: right; 
+            font-size: 3.8pt; 
+            line-height: 1.3; /* AJUSTÉ : Plus d'espace entre les lignes */
+            color: #222; 
+        }
 
         .tracking-bar {
-            border-top: 0.15mm solid #333; padding-top: 0.8mm;
+            border-top: 0.2mm solid #000; padding-top: 0.8mm;
             display: flex; justify-content: space-between;
-            font-size: 5pt; font-weight: bold; color: #000;
+            font-size: 5.2pt; font-weight: bold; color: #000;
         }
 
         /* --- PRINT GRID --- */
-        #print-grid { display: none; }
+        #print-grid { display: none; width: 190mm; margin: 0 auto; }
 
         @media print {
             body * { visibility: hidden; }
             #print-grid, #print-grid * { visibility: visible; }
             #print-grid {
-                display: flex;
+                display: flex !important;
                 flex-wrap: wrap;
-                gap: 2mm; /* Espace pour la découpe */
-                position: absolute; left: 0; top: 0;
+                gap: 0;
+                position: absolute; left: 10mm; top: 10mm;
             }
-            .label-container { 
-                box-shadow: none; 
-                border: 0.1mm solid #f0f0f0; 
-                page-break-inside: avoid;
-            }
+            .label-container { box-shadow: none; border: 0.1mm solid #f2f2f2; page-break-inside: avoid; }
         }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <h2>Sablé 30g</h2>
+        <h2>Sablé 30g - Studio</h2>
         <div class="warning-box">
-            <strong>RÉGLAGES IMPRESSION :</strong><br>
-            1. Échelle : <b>100%</b> (ou Standard)<br>
-            2. Marges : <b>Par défaut</b>
+            <strong>PARAMÈTRES PDF :</strong><br>
+            Une fois le PDF ouvert, choisissez "Taille Réelle" (ou Échelle 100%) et papier "Lourd/Épais".
         </div>
         <div class="input-group">
             <label>Parfum</label>
             <select id="inFlavor" onchange="loadFlavor()">
-                <option value="the">Sablé au Thé</option>
+                <option value="the">Sablé au Thé Blanc</option>
                 <option value="gingembre">Sablé au Gingembre</option>
                 <option value="vanille">Sablé Thé Blanc & Vanille</option>
                 <option value="geranium">Sablé Géranium Rosat</option>
@@ -141,23 +144,27 @@
                 <option value="mangue">Sablé Gingembre Mangue</option>
             </select>
         </div>
-        <div class="input-group">
-            <label>Lot</label>
-            <input type="text" id="inLot" value="212852">
+        <div class="input-row" style="display:flex; gap:10px;">
+            <div class="input-group">
+                <label>Lot</label>
+                <input type="text" id="inLot" value="212852">
+            </div>
+            <div class="input-group">
+                <label>DDM</label>
+                <input type="text" id="inDDM" value="02/2027">
+            </div>
         </div>
         <div class="input-group">
-            <label>DDM</label>
-            <input type="text" id="inDDM" value="02/2027">
-        </div>
-        <div class="input-group">
-            <label>Zoom Vue</label>
+            <label>Zoom Vue écran</label>
             <input type="range" id="inZoom" min="1" max="6" step="0.1" value="3.5" oninput="applyZoom()">
         </div>
         <div class="input-group">
-            <label>Nb d'étiquettes</label>
+            <label>Nombre d'étiquettes</label>
             <input type="number" id="inCount" value="1" min="1">
         </div>
-        <button class="btn-print" onclick="printLabels()">IMPRIMER LA PLANCHE</button>
+        
+        <button class="btn-action btn-download" onclick="downloadPDF()">TÉLÉCHARGER LE PDF</button>
+        <button class="btn-action btn-print" onclick="printLabels()">IMPRIMER DIRECTEMENT</button>
     </div>
 
     <div class="preview-pane">
@@ -165,7 +172,7 @@
             <div class="label-container" id="main-label">
                 <img src="logo-noir.png" class="logo-main">
                 <div class="title-band">
-                    <div class="product-title" id="outTitle">Sablé au Thé</div>
+                    <div class="product-title" id="outTitle">Sablé au Thé Blanc</div>
                 </div>
                 <div class="ingredients" id="outIng"></div>
                 <div class="footer-area">
@@ -191,7 +198,7 @@
 
     <script>
         const flavors = {
-            the: { t: "Sablé au Thé", i: "Ingrédients : Farine (55,1%), beurre (36,73%), sucre (6,12%), thé blanc* (2,04%)." },
+            the: { t: "Sablé au Thé Blanc", i: "Ingrédients : Farine (55,1%), beurre (36,73%), sucre (6,12%), thé blanc* (2,04%)." },
             gingembre: { t: "Sablé au Gingembre", i: "Ingrédients : Farine (55,42%), beurre (36,95%), sucre (6,16%), gingembre* (1,48%)." },
             vanille: { t: "Sablé Thé Blanc & Vanille", i: "Ingrédients : Farine (54,9%), beurre (36,6%), sucre (6,1%), thé blanc*(2,03%), vanille* (0,38%)." },
             geranium: { t: "Sablé Géranium Rosat", i: "Ingrédients : Farine (56,24%), beurre (37,49%), sucre (6,25%), huile essentielle de géranium rosat * (0,02%)." },
@@ -210,17 +217,37 @@
             document.getElementById('label-wrap').style.transform = `scale(${document.getElementById('inZoom').value})`;
         }
 
-        function printLabels() {
+        function prepareGrid() {
             document.getElementById('outLot').innerText = document.getElementById('inLot').value;
             document.getElementById('outDDM').innerText = document.getElementById('inDDM').value;
-            
             const count = document.getElementById('inCount').value;
             const grid = document.getElementById('print-grid');
             grid.innerHTML = '';
             const html = document.getElementById('main-label').outerHTML;
             for(let i=0; i<count; i++) grid.innerHTML += html;
+            return grid;
+        }
+
+        function printLabels() {
+            prepareGrid();
+            setTimeout(() => { window.print(); }, 300);
+        }
+
+        function downloadPDF() {
+            const element = prepareGrid();
+            element.style.display = 'flex';
             
-            setTimeout(() => { window.print(); }, 200);
+            const opt = {
+                margin:       10,
+                filename:     'etiquettes_sables_30g.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 3, useCORS: true, letterRendering: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.style.display = 'none';
+            });
         }
 
         window.onload = () => { loadFlavor(); applyZoom(); };
