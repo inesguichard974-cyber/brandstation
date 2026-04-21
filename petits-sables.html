@@ -63,6 +63,7 @@
             position: relative;
             display: flex;
             flex-direction: column;
+            justify-content: space-between; /* Assure que le header et footer restent aux extrémités */
             box-sizing: border-box;
             overflow: hidden;
             -webkit-print-color-adjust: exact;
@@ -72,23 +73,42 @@
         .logo-main {
             width: 13.5mm; margin: 1.2mm auto 0.3mm auto; display: block;
             filter: brightness(0.7) contrast(1.4);
+            flex-shrink: 0; /* Empêche le logo de rétrécir */
         }
 
         .title-band {
             background-color: var(--beige-bande) !important;
             width: 100%; padding: 1.3mm 0; text-align: center;
             border-top: 0.1mm solid rgba(0,0,0,0.1); border-bottom: 0.1mm solid rgba(0,0,0,0.1);
+            flex-shrink: 0;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
         }
 
-        .product-title { color: #000 !important; font-size: 8.5pt; font-weight: 900; margin: 0; text-transform: uppercase; }
+        /* FIX WINDOWS : nowrap et léger ajustement de la police */
+        .product-title { 
+            color: #000 !important; 
+            font-size: 8pt; /* Réduit très légèrement pour Windows */
+            letter-spacing: -0.2px; /* Resserre très légèrement les lettres */
+            font-weight: 900; 
+            margin: 0; 
+            text-transform: uppercase; 
+            white-space: nowrap; /* Interdit le passage à la ligne */
+        }
 
         .ingredients {
             flex-grow: 1; padding: 0.5mm 3.5mm; text-align: center;
             font-size: 5.4pt; line-height: 1.2; color: #1a1a1a;
             display: flex; align-items: center; justify-content: center;
+            overflow: hidden; /* Empêche de déborder sur le footer */
         }
 
-        .footer-area { padding: 0 2.2mm 1.5mm 2.2mm; }
+        /* FIX WINDOWS : flex-shrink 0 empêche le bloc d'être écrasé par les ingrédients */
+        .footer-area { 
+            padding: 0 2.2mm 1.5mm 2.2mm; 
+            flex-shrink: 0; 
+        }
+        
         .baf-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.8mm; }
         .logo-baf { height: 6.5mm; }
         
@@ -161,14 +181,14 @@
     <div class="preview-pane">
         <div id="label-wrap">
             <div class="label-container" id="main-label">
-                <img src="logo-noir.png" class="logo-main">
+                <img src="logo-noir.png" class="logo-main" alt="Logo">
                 <div class="title-band">
                     <div class="product-title" id="outTitle">Sablé au Thé Blanc</div>
                 </div>
                 <div class="ingredients" id="outIng"></div>
                 <div class="footer-area">
                     <div class="baf-row">
-                        <img src="BAF.png" class="logo-baf">
+                        <img src="BAF.png" class="logo-baf" alt="Logo BAF">
                         <div class="certif-block">
                             *Issu de l'agriculture biologique<br>
                             Certifié par FR-BIO-01<br>
@@ -198,7 +218,6 @@
             mangue: { t: "Sablé Gingembre Mangue", i: "Ingrédients : Farine (55,42%), beurre (36,95%), sucre (6,16%), gingembre mangue (1,48%)." }
         };
 
-        // Met à jour Lot et DDM dès qu'on tape
         function syncTracking() {
             document.getElementById('outLot').innerText = document.getElementById('inLot').value;
             document.getElementById('outDDM').innerText = document.getElementById('inDDM').value;
@@ -208,7 +227,7 @@
             const f = flavors[document.getElementById('inFlavor').value];
             document.getElementById('outTitle').innerText = f.t;
             document.getElementById('outIng').innerText = f.i;
-            syncTracking(); // Assure la synchro au changement de parfum
+            syncTracking();
         }
 
         function applyZoom() {
