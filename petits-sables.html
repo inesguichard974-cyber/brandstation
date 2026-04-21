@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studio Étiquettes 50x40 - Mise à jour Live</title>
+    <title>Studio Étiquettes 30g - Mix de Saveurs</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -12,7 +12,8 @@
             --lbl-h: 40mm;
         }
 
-        @page { size: A4; margin: 10mm; }
+        /* CONFIGURATION IMPRESSION OPTIMISÉE (28/page) */
+        @page { size: A4; margin: 5mm; }
 
         body {
             margin: 0; font-family: 'Arial', sans-serif;
@@ -22,7 +23,7 @@
 
         /* --- SIDEBAR --- */
         .sidebar {
-            width: 350px; background: white; padding: 20px;
+            width: 380px; background: white; padding: 20px;
             box-shadow: 2px 0 15px rgba(0,0,0,0.2);
             overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
             z-index: 100;
@@ -34,15 +35,30 @@
 
         .btn-action {
             border: none; padding: 12px; border-radius: 6px; 
-            font-weight: bold; cursor: pointer; margin-top: 5px; color: white;
+            font-weight: bold; cursor: pointer; color: white; transition: opacity 0.2s;
         }
+        .btn-action:hover { opacity: 0.9; }
+        .btn-action:disabled { background: #95a5a6 !important; cursor: not-allowed; }
+        
+        .btn-add { background: #f39c12; margin-top: 5px; }
         .btn-print { background: #27ae60; }
         .btn-download { background: #2980b9; }
+        .btn-clear { background: #e74c3c; padding: 6px 10px; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 0.75rem;}
 
-        .warning-box {
-            background: #e7f3ff; color: #0c5460; padding: 10px; font-size: 0.75rem;
-            border-radius: 4px; border: 1px solid #bee5eb;
+        /* --- ZONE PANIER (MIX SAVEURS) --- */
+        .cart-section {
+            background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; padding: 12px;
+            display: flex; flex-direction: column; gap: 8px;
         }
+        .cart-header {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.85rem; font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 5px;
+        }
+        .cart-item {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.75rem; background: white; border: 1px solid #eee; padding: 6px; border-radius: 4px;
+        }
+        .btn-remove { background: none; border: none; color: #e74c3c; cursor: pointer; font-size: 0.9rem; }
 
         /* --- ZONE PREVIEW --- */
         .preview-pane {
@@ -52,97 +68,71 @@
 
         #label-wrap { transition: transform 0.1s ease; }
 
-        /* --- L'ÉTIQUETTE --- */
+        /* --- L'ÉTIQUETTE (WINDOWS & TEXTE LONG FIXÉS) --- */
         .label-container {
             width: var(--lbl-w);
             height: var(--lbl-h);
             background-color: white;
             background-image: url("FOND THE BLANC...-0001.jpg");
-            background-size: cover;
-            background-position: center;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between; /* Assure que le header et footer restent aux extrémités */
-            box-sizing: border-box;
-            overflow: hidden;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            background-size: cover; background-position: center;
+            position: relative; display: flex; flex-direction: column; justify-content: space-between;
+            box-sizing: border-box; overflow: hidden;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+            border: 0.05mm solid transparent;
         }
 
         .logo-main {
             width: 13.5mm; margin: 1.2mm auto 0.3mm auto; display: block;
-            filter: brightness(0.7) contrast(1.4);
-            flex-shrink: 0; /* Empêche le logo de rétrécir */
+            filter: brightness(0.7) contrast(1.4); flex-shrink: 0;
         }
 
         .title-band {
             background-color: var(--beige-bande) !important;
             width: 100%; padding: 1.3mm 0; text-align: center;
             border-top: 0.1mm solid rgba(0,0,0,0.1); border-bottom: 0.1mm solid rgba(0,0,0,0.1);
-            flex-shrink: 0;
-            display: flex; justify-content: center; align-items: center;
-            overflow: hidden;
+            flex-shrink: 0; overflow: hidden;
         }
 
-        /* FIX WINDOWS : nowrap et léger ajustement de la police */
         .product-title { 
-            color: #000 !important; 
-            font-size: 8pt; /* Réduit très légèrement pour Windows */
-            letter-spacing: -0.2px; /* Resserre très légèrement les lettres */
-            font-weight: 900; 
-            margin: 0; 
-            text-transform: uppercase; 
-            white-space: nowrap; /* Interdit le passage à la ligne */
+            color: #000 !important; font-size: 8pt; letter-spacing: -0.2px; font-weight: 900; 
+            margin: 0; text-transform: uppercase; white-space: nowrap; 
         }
 
         .ingredients {
-            flex-grow: 1; padding: 0.5mm 3.5mm; text-align: center;
-            font-size: 5.4pt; line-height: 1.2; color: #1a1a1a;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden; /* Empêche de déborder sur le footer */
+            flex-grow: 1; padding: 2mm 3.5mm 0.5mm 3.5mm; 
+            text-align: center; font-size: 5.4pt; line-height: 1.15; color: #1a1a1a;
+            display: flex; align-items: flex-start; justify-content: center; overflow: hidden;
         }
 
-        /* FIX WINDOWS : flex-shrink 0 empêche le bloc d'être écrasé par les ingrédients */
-        .footer-area { 
-            padding: 0 2.2mm 1.5mm 2.2mm; 
-            flex-shrink: 0; 
-        }
-        
+        .footer-area { padding: 0 2.2mm 1.2mm 2.2mm; flex-shrink: 0; }
         .baf-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.8mm; }
         .logo-baf { height: 6.5mm; }
         
-        .certif-block { 
-            text-align: right; 
-            font-size: 3.8pt; 
-            line-height: 1.3;
-            color: #222; 
-        }
+        .certif-block { text-align: right; font-size: 3.8pt; line-height: 1.2; color: #222; }
 
         .tracking-bar {
-            border-top: 0.2mm solid #000; padding-top: 0.8mm;
-            display: flex; justify-content: space-between;
+            border-top: 0.2mm solid #000; padding-top: 0.6mm; display: flex; justify-content: space-between;
             font-size: 5.2pt; font-weight: bold; color: #000;
         }
 
-        /* --- PRINT GRID --- */
-        #print-grid { display: none; width: 190mm; margin: 0 auto; }
+        /* --- GRILLE D'IMPRESSION --- */
+        #print-grid { display: none; width: 200mm; margin: 0; }
 
         @media print {
             body * { visibility: hidden; }
             #print-grid, #print-grid * { visibility: visible; }
             #print-grid {
                 display: flex !important; flex-wrap: wrap; gap: 0;
-                position: absolute; left: 10mm; top: 10mm;
+                position: absolute; left: 0; top: 0;
             }
-            .label-container { box-shadow: none; border: 0.1mm solid #f2f2f2; page-break-inside: avoid; }
+            .label-container { border: 0.05mm solid #eee; page-break-inside: avoid; }
         }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <h2>Sablé 30g - Studio</h2>
+        <h2>Sablé 30g - Studio & Mix</h2>
         <div class="input-group">
             <label>Parfum</label>
             <select id="inFlavor" onchange="loadFlavor()">
@@ -165,17 +155,30 @@
                 <input type="text" id="inDDM" value="02/2027" oninput="syncTracking()">
             </div>
         </div>
+        
         <div class="input-group">
             <label>Zoom Vue écran</label>
             <input type="range" id="inZoom" min="1" max="6" step="0.1" value="3.5" oninput="applyZoom()">
         </div>
+
+        <hr style="width: 100%; border: 0.5px solid #eee; margin: 5px 0;">
+
         <div class="input-group">
-            <label>Nombre d'étiquettes</label>
+            <label>Quantité à ajouter (max 28/feuille)</label>
             <input type="number" id="inCount" value="1" min="1">
         </div>
-        
+        <button class="btn-action btn-add" id="btnAdd" onclick="addToSheet()">+ AJOUTER À LA FEUILLE</button>
+
+        <div class="cart-section">
+            <div class="cart-header">
+                <span id="sheet-counter">0 / 28 étiquettes</span>
+                <button class="btn-clear" onclick="clearSheet()">Vider</button>
+            </div>
+            <div id="cart-list"></div>
+        </div>
+
+        <button class="btn-action btn-print" onclick="printLabels()">IMPRIMER LA FEUILLE</button>
         <button class="btn-action btn-download" onclick="downloadPDF()">TÉLÉCHARGER LE PDF</button>
-        <button class="btn-action btn-print" onclick="printLabels()">IMPRIMER DIRECTEMENT</button>
     </div>
 
     <div class="preview-pane">
@@ -188,7 +191,7 @@
                 <div class="ingredients" id="outIng"></div>
                 <div class="footer-area">
                     <div class="baf-row">
-                        <img src="BAF.png" class="logo-baf" alt="Logo BAF">
+                        <img src="BAF.png" class="logo-baf" alt="BAF">
                         <div class="certif-block">
                             *Issu de l'agriculture biologique<br>
                             Certifié par FR-BIO-01<br>
@@ -218,6 +221,9 @@
             mangue: { t: "Sablé Gingembre Mangue", i: "Ingrédients : Farine (55,42%), beurre (36,95%), sucre (6,16%), gingembre mangue (1,48%)." }
         };
 
+        const MAX_LABELS = 28;
+        let cart = [];
+
         function syncTracking() {
             document.getElementById('outLot').innerText = document.getElementById('inLot').value;
             document.getElementById('outDDM').innerText = document.getElementById('inDDM').value;
@@ -234,13 +240,84 @@
             document.getElementById('label-wrap').style.transform = `scale(${document.getElementById('inZoom').value})`;
         }
 
+        // GESTION DU PANIER (MIX SAVEURS)
+        function addToSheet() {
+            syncTracking(); // Sécurité
+            const qty = parseInt(document.getElementById('inCount').value);
+            const flavorName = flavors[document.getElementById('inFlavor').value].t;
+            const lot = document.getElementById('inLot').value;
+            
+            let currentTotal = cart.reduce((sum, item) => sum + item.qty, 0);
+            if (currentTotal + qty > MAX_LABELS) {
+                alert(`⚠️ Impossible : Il ne reste de la place que pour ${MAX_LABELS - currentTotal} étiquette(s) sur cette feuille.`);
+                return;
+            }
+
+            const labelHtml = document.getElementById('main-label').outerHTML;
+            cart.push({ id: Date.now(), flavorName, qty, lot, html: labelHtml });
+            updateCartUI();
+        }
+
+        function removeFromSheet(id) {
+            cart = cart.filter(item => item.id !== id);
+            updateCartUI();
+        }
+
+        function clearSheet() {
+            cart = [];
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const list = document.getElementById('cart-list');
+            const counter = document.getElementById('sheet-counter');
+            const btnAdd = document.getElementById('btnAdd');
+            
+            list.innerHTML = '';
+            let total = 0;
+            
+            cart.forEach(item => {
+                total += item.qty;
+                const div = document.createElement('div');
+                div.className = 'cart-item';
+                div.innerHTML = `
+                    <span><b>${item.qty}x</b> ${item.flavorName} (Lot ${item.lot})</span>
+                    <button onclick="removeFromSheet(${item.id})" class="btn-remove" title="Supprimer">✖️</button>
+                `;
+                list.appendChild(div);
+            });
+            
+            counter.innerText = `${total} / ${MAX_LABELS} étiquettes`;
+            if(total >= MAX_LABELS) {
+                counter.style.color = "#e74c3c";
+                btnAdd.disabled = true;
+            } else {
+                counter.style.color = "#000";
+                btnAdd.disabled = false;
+            }
+        }
+
+        // PRÉPARATION IMPRESSION
         function prepareGrid() {
             syncTracking();
-            const count = document.getElementById('inCount').value;
             const grid = document.getElementById('print-grid');
             grid.innerHTML = '';
-            const html = document.getElementById('main-label').outerHTML;
-            for(let i=0; i<count; i++) grid.innerHTML += html;
+            
+            // Si le panier est vide, on imprime juste ce qui est à l'écran
+            if (cart.length === 0) {
+                let qty = parseInt(document.getElementById('inCount').value) || 1;
+                qty = Math.min(qty, MAX_LABELS);
+                const html = document.getElementById('main-label').outerHTML;
+                for(let i=0; i<qty; i++) grid.innerHTML += html;
+                return grid;
+            }
+
+            // Sinon on imprime le mix
+            cart.forEach(item => {
+                for(let i=0; i<item.qty; i++) {
+                    grid.innerHTML += item.html;
+                }
+            });
             return grid;
         }
 
@@ -252,21 +329,19 @@
         function downloadPDF() {
             const element = prepareGrid();
             element.style.display = 'flex';
-            
             const opt = {
-                margin:       10,
-                filename:     'etiquettes_sables_30g.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 3, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                margin: 5,
+                filename: 'etiquettes_mix_30g.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 3, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
-
             html2pdf().set(opt).from(element).save().then(() => {
                 element.style.display = 'none';
             });
         }
 
-        window.onload = () => { loadFlavor(); applyZoom(); };
+        window.onload = () => { loadFlavor(); applyZoom(); updateCartUI(); };
     </script>
 </body>
 </html>
