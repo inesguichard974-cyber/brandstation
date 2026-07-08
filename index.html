@@ -2,8 +2,7 @@
 <html lang="fr">
 <head>
     <link rel="icon" type="image/png" href="favicon.png">
-
-<link rel="apple-touch-icon" href="images/favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
     <meta charset="UTF-8">
     <title>Le Labyrinthe - Brand Station</title>
     <style>
@@ -96,6 +95,12 @@
             box-shadow: 0 10px 30px rgba(1, 183, 219, 0.2);
         }
 
+        /* Effet d'enfoncement au clic */
+        .card:active {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(1, 183, 219, 0.1);
+        }
+
         .card-icon {
             width: 60px;
             height: 60px;
@@ -140,7 +145,7 @@
     <div class="hub-grid">
         <a href="studio-labels.html" class="card">
             <div class="card-icon">🏷️</div>
-            <h3>Étiquettes présentoire Dosettes</h3>
+            <h3>Étiquettes présentoir Dosettes</h3>
             <p>Générateur pour le présentoir à dosettes. Gestion du logo et des motifs.</p>
             <div class="badge">ACTIF</div>
         </a>
@@ -152,17 +157,17 @@
             <div class="badge">ACTIF</div>
         </a>
 
-         <a href="color.html" class="card">
+        <a href="color.html" class="card">
             <div class="card-icon">🎨</div>
-            <h3>Palette de couleur du labyrinthe</h3>
-            <p>Toutes les couleurs du labyrinthe</p>
+            <h3>PALETTE DE COULEURS DU LABYRINTHE</h3>
+            <p>Charte graphique et codes couleurs officiels du Labyrinthe.</p>
             <div class="badge">ACTIF</div>
         </a>
 
-         <a href="visual-grid.html" class="card">
+        <a href="visual-grid.html" class="card">
             <div class="card-icon">📱</div>
-            <h3>Grille Instagram</h3>
-            <p>Pour prévisualiser mon feed </p>
+            <h3>GRILLE INSTAGRAM</h3>
+            <p>Prévisualisation du feed et de la cohérence visuelle.</p>
             <div class="badge">ACTIF</div>
         </a>
 
@@ -173,18 +178,11 @@
             <div class="badge">ACTIF</div>
         </a>
 
-        <a href="#" class="card" style="opacity: 0.6; cursor: default;">
-            <div class="card-icon">📄</div>
-            <h3>Affiches A4</h3>
-            <p>Fiches de dégustation et signalétique boutique pour Grand Coude.</p>
-            <div class="badge" style="background: #555;">EN DÉVELOPPEMENT</div>
-        </a>
-
-        <a href="#" class="card" style="opacity: 0.6; cursor: default;">
-            <div class="card-icon">📱</div>
-            <h3>Réseaux Sociaux</h3>
-            <p>Templates Instagram, Facebook et TikTok aux couleurs de la marque.</p>
-            <div class="badge" style="background: #555;">EN DÉVELOPPEMENT</div>
+        <a href="https://capable-moonbeam-5258a4.netlify.app/" target="_blank" class="card">
+            <div class="card-icon">🎟️</div>
+            <h3>Billets d'entrée</h3>
+            <p>Pour créer ou valider des entrées gratuites.</p>
+            <div class="badge">ACTIF</div>
         </a>
     </div>
 
