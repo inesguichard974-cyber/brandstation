@@ -340,7 +340,7 @@
             };
             html2pdf().set(opt).from(element).save().then(() => {
                 element.style.display = 'none';
-            });
+            }); 
         }
 
         window.onload = () => { loadFlavor(); applyZoom(); updateCartUI(); };
