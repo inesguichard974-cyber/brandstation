@@ -8,22 +8,24 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
-            --label-w: 10cm; --label-h: 10cm;
+            --label-w: 6cm; 
+            --label-h: 6cm;
             --color-fond: #ffffff;
             --color-accent: #f2e8cf; 
             --color-txt-cat: #000000;
             --color-txt-flav: #000000;
             --motif-opacity: 0.4;
-            --flavor-size: 38px;
-            --dist-logo-bande: 30px;
-            --band-padding: 24px;
-            --tab-width: 200px;
-            --logo-width: 110px;
+            --flavor-size: 20px;
+            --dist-logo-bande: 10px;
+            --band-padding: 10px;
+            --tab-width: 110px;
+            --logo-width: 65px;
+            --zoom-ecran: 1.3;
         }
 
         body { font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; margin: 0; background: #111; color: #eee; height: 100vh; overflow: hidden; }
         
-        .sidebar { width: 400px; padding: 25px; background: #1a1a1a; border-right: 1px solid #333; overflow-y: auto; }
+        .sidebar { width: 400px; padding: 25px; background: #1a1a1a; border-right: 1px solid #333; overflow-y: auto; z-index: 20; }
         .sidebar h2 { color: #2ecc71; font-size: 18px; margin-bottom: 25px; }
         .section { margin-bottom: 20px; padding: 15px; background: #222; border-radius: 8px; border: 1px solid #333; }
         label { display: block; font-size: 10px; color: #888; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; }
@@ -40,13 +42,31 @@
         .btn-export { background: #3498db; color: white; }
         .btn-print { background: #27ae60; color: white; }
 
-        .preview { flex-grow: 1; display: flex; justify-content: center; align-items: center; background: #0f0f0f; }
+        .preview { flex-grow: 1; display: flex; justify-content: center; align-items: center; background: #0f0f0f; overflow: auto; }
+
+        .preview-scaler {
+            transform: scale(var(--zoom-ecran));
+            transform-origin: center center;
+            transition: transform 0.1s ease;
+        }
+
+        /* Le conteneur à l'écran n'affiche qu'une seule étiquette pour travailler proprement */
+        #print-zone {
+            display: block;
+        }
 
         #etiquette {
-            width: var(--label-w); height: var(--label-h);
+            width: var(--label-w); 
+            height: var(--label-h);
             background-color: var(--color-fond);
             position: relative; display: flex; flex-direction: column; align-items: center;
             overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        /* Clones invisibles à l'écran, visibles uniquement à l'impression */
+        .print-only-clone {
+            display: none;
         }
 
         .background-pattern {
@@ -61,56 +81,60 @@
         .logo-tab {
             position: relative; z-index: 10;
             background-color: var(--color-accent);
-            width: var(--tab-width); height: 195px;
+            width: var(--tab-width); 
+            height: calc(var(--tab-width) * 0.95); 
             border-radius: 0 0 100px 100px;
             display: flex; align-items: center; justify-content: center;
+            box-sizing: border-box;
         }
 
         .logo-tab::after {
             content: "";
             position: absolute;
-            top: 0; left: 4px; right: 4px; bottom: 4px;
+            top: 0; left: 2px; right: 2px; bottom: 2px;
             border: 1px solid #000000;
             border-top: none;
-            border-radius: 0 0 96px 96px;
+            border-radius: 0 0 98px 98px;
             pointer-events: none;
         }
 
         .logo-tab img { 
             width: var(--logo-width); 
             height: auto; 
-            margin-top: -10px; 
+            margin-top: -5px; 
             z-index: 11; 
         }
 
         .category-band {
             position: relative; z-index: 5;
             background-color: var(--color-accent);
-            width: 100%; margin-top: var(--dist-logo-bande);
+            width: 100%; 
+            margin-top: var(--dist-logo-bande);
             padding: var(--band-padding) 0;
             text-align: center;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-sizing: border-box;
         }
-        .category-text { color: var(--color-txt-cat); font-size: 42px; font-weight: 500; letter-spacing: 5px; margin: 0; text-transform: uppercase; }
+        .category-text { color: var(--color-txt-cat); font-size: 20px; font-weight: 500; letter-spacing: 2px; margin: 0; text-transform: uppercase; }
 
         .flavor-container {
             position: relative; z-index: 5; flex-grow: 1;
             display: flex; align-items: center; justify-content: center;
-            width: 100%; padding: 0 20px; box-sizing: border-box;
+            width: 100%; padding: 0 10px; box-sizing: border-box;
         }
         .flavor-text {
             color: var(--color-txt-flav); font-size: var(--flavor-size);
-            font-weight: 400; letter-spacing: 3px; text-transform: uppercase;
+            font-weight: 400; letter-spacing: 1px; text-transform: uppercase;
             white-space: nowrap;
         }
 
-        /* --- CONFIGURATION POUR L'IMPRESSION --- */
+        /* --- CONFIGURATION POUR L'IMPRESSION (PLANCHE MULTIPLE) --- */
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 20mm; /* Marges de la feuille A4 */
+                margin: 12mm 10mm; /* Optimisé pour caler un max de 6x6cm */
             }
             body {
                 background: white !important;
@@ -119,21 +143,34 @@
                 overflow: visible;
             }
             .sidebar {
-                display: none !important; /* Masque le panneau de contrôle */
+                display: none !important;
             }
             .preview {
                 background: transparent !important;
                 display: block;
                 padding: 0;
                 margin: 0;
+                overflow: visible;
             }
-            #etiquette {
-                /* Force la taille réelle en sortie d'imprimante peu importe les réglages curseurs */
+            .preview-scaler {
+                transform: none !important; 
+            }
+            
+            /* Transformation de la zone en planche de gommettes / étiquettes */
+            #print-zone {
+                display: grid !important;
+                grid-template-columns: repeat(3, 6cm); /* 3 étiquettes par ligne max (3x6 = 18cm, rentre dans les 21cm de l'A4) */
+                gap: 8mm; /* Espace de découpe entre les étiquettes */
+                justify-content: center;
+            }
+
+            #etiquette, .print-only-clone {
+                display: flex !important; /* Rend visible les copies */
                 width: 6cm !important;
                 height: 6cm !important;
-                border: 1px dashed #ccc; /* Optionnel : petite bordure de découpe */
+                border: 1px dashed #ddd; /* Ligne fine d'aide à la découpe */
                 page-break-inside: avoid;
-                -webkit-print-color-adjust: exact; /* Force l'impression des couleurs de fond */
+                -webkit-print-color-adjust: exact; 
                 print-color-adjust: exact;
             }
         }
@@ -145,11 +182,19 @@
     <h2>LABYRINTHE DESIGNER</h2>
 
     <div class="section">
-        <label>Dimensions Étiquette Écran (cm)</label>
-        <div class="row">
-            <input type="number" id="w" value="10" oninput="update()">
-            <input type="number" id="h" value="10" oninput="update()">
-        </div>
+        <label>Quantité à l'Impression</label>
+        <select id="print-qty" onchange="updateQuantity()">
+            <option value="1">1 seule étiquette</option>
+            <option value="2">2 étiquettes</option>
+            <option value="3">3 étiquettes (1 ligne)</option>
+            <option value="4">4 étiquettes</option>
+            <option value="6">6 étiquettes (2 lignes)</option>
+            <option value="9">9 étiquettes (3 lignes)</option>
+            <option value="12">12 étiquettes (Planche A4 complète)</option>
+        </select>
+        
+        <label style="margin-top:10px;">Zoom Affichage Écran</label>
+        <input type="range" id="zoom-in" min="1" max="2.5" step="0.1" value="1.3" oninput="update()">
     </div>
 
     <div class="section">
@@ -181,15 +226,18 @@
     </div>
 
     <div class="section">
-        <label>Ajustements</label>
-        <label>Taille du Logo</label>
-        <input type="range" id="logo-size-in" min="50" max="180" value="110" oninput="update()">
+        <label>Ajustements Éléments (6x6)</label>
+        <label>Largeur Onglet Logo</label>
+        <input type="range" id="tab-w-in" min="80" max="150" value="110" oninput="update()">
+
+        <label style="margin-top:10px;">Taille du Logo</label>
+        <input type="range" id="logo-size-in" min="40" max="90" value="65" oninput="update()">
         
         <label style="margin-top:10px;">Hauteur de la Bande</label>
-        <input type="range" id="band-h-in" min="5" max="60" value="24" oninput="update()">
+        <input type="range" id="band-h-in" min="5" max="30" value="10" oninput="update()">
         
         <label style="margin-top:10px;">Distance Logo &lt;-&gt; Bande</label>
-        <input type="range" id="dist-in" min="0" max="150" value="30" oninput="update()">
+        <input type="range" id="dist-in" min="0" max="50" value="10" oninput="update()">
         
         <label style="margin-top:10px;">Visibilité Feuilles</label>
         <input type="range" id="op-in" min="0" max="1" step="0.05" value="0.4" oninput="update()">
@@ -200,7 +248,7 @@
         <input type="text" id="cat-in" value="THÉ BLANC" oninput="update()">
         <input type="text" id="flav-in" value="GÉRANIUM ROSAT" oninput="update()">
         <label>Taille Police Saveur</label>
-        <input type="range" id="size-in" min="20" max="85" value="38" oninput="update()">
+        <input type="range" id="size-in" min="12" max="35" value="20" oninput="update()">
     </div>
 
     <div class="btn-group">
@@ -210,16 +258,22 @@
 </div>
 
 <div class="preview">
-    <div id="etiquette">
-        <div class="background-pattern"></div>
-        <div class="logo-tab">
-            <img src="logo-labyrinthe.png" alt="LOGO">
-        </div>
-        <div class="category-band">
-            <h1 class="category-text" id="cat-out">THÉ BLANC</h1>
-        </div>
-        <div class="flavor-container">
-            <div class="flavor-text" id="flav-out">GÉRANIUM ROSAT</div>
+    <div class="preview-scaler">
+        <div id="print-zone">
+            
+            <div id="etiquette">
+                <div class="background-pattern"></div>
+                <div class="logo-tab">
+                    <img src="logo-labyrinthe.png" alt="LOGO">
+                </div>
+                <div class="category-band">
+                    <h1 class="category-text" id="cat-out">THÉ BLANC</h1>
+                </div>
+                <div class="flavor-container">
+                    <div class="flavor-text" id="flav-out">GÉRANIUM ROSAT</div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -228,30 +282,45 @@
     function update() {
         const root = document.documentElement;
         
-        // Couleurs
+        root.style.setProperty('--zoom-ecran', document.getElementById('zoom-in').value);
         root.style.setProperty('--color-fond', document.getElementById('bg-in').value);
         root.style.setProperty('--color-accent', document.getElementById('accent-in').value);
         root.style.setProperty('--color-txt-cat', document.getElementById('txt-cat-color').value);
         root.style.setProperty('--color-txt-flav', document.getElementById('txt-flav-color').value);
-        
-        // Dimensions & Ajustements
-        root.style.setProperty('--label-w', document.getElementById('w').value + 'cm');
-        root.style.setProperty('--label-h', document.getElementById('h').value + 'cm');
+        root.style.setProperty('--tab-width', document.getElementById('tab-w-in').value + 'px');
         root.style.setProperty('--logo-width', document.getElementById('logo-size-in').value + 'px');
         root.style.setProperty('--band-padding', document.getElementById('band-h-in').value + 'px');
         root.style.setProperty('--dist-logo-bande', document.getElementById('dist-in').value + 'px');
         root.style.setProperty('--motif-opacity', document.getElementById('op-in').value);
         root.style.setProperty('--flavor-size', document.getElementById('size-in').value + 'px');
         
-        // Textes
         document.getElementById('cat-out').innerText = document.getElementById('cat-in').value;
         document.getElementById('flav-out').innerText = document.getElementById('flav-in').value;
+    }
+
+    // Fonction qui duplique dynamiquement l'étiquette au moment du changement de quantité
+    function updateQuantity() {
+        const qty = parseInt(document.getElementById('print-qty').value);
+        const printZone = document.getElementById('print-zone');
+        const original = document.getElementById('etiquette');
+        
+        // Supprime les anciens clones s'il y en a
+        const oldClones = printZone.querySelectorAll('.print-only-clone');
+        oldClones.forEach(clone => clone.remove());
+        
+        // Crée le nombre requis de copies
+        for (let i = 1; i < qty; i++) {
+            const clone = original.cloneNode(true);
+            clone.removeAttribute('id'); // Retire l'ID pour éviter les doublons
+            clone.classList.add('print-only-clone'); // Classe masquée à l'écran, visible au print
+            printZone.appendChild(clone);
+        }
     }
 
     function exportPNG() {
         const element = document.getElementById('etiquette');
         html2canvas(element, { 
-            scale: 4, 
+            scale: 5, 
             backgroundColor: null,
             useCORS: true
         }).then(canvas => {
