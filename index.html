@@ -1,34 +1,57 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Labyrinthe - Brand Station</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
-    <meta charset="UTF-8">
-    <title>Le Labyrinthe - Brand Station</title>
+    
+    <!-- Polices officielles de la charte : Cormorant Garamond & Jost -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --primary: #728ecb;
-            --beige: #f2e8cf;
-            --dark: #9bb8c9;
+            --color-foret: #053716;
+            --color-or: #B2984F;
+            --color-ivoire: #E5E7DF;
+            --color-creme: #F5F3EE;
+            --color-nuit: #1E1E1E;
+            --color-border: rgba(178, 152, 79, 0.25);
             --bg-leaf: url('fond-motif.png');
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Jost', sans-serif;
             margin: 0;
-            background-color: var(--dark);
-            color: white;
+            background-color: var(--color-creme);
+            color: var(--color-nuit);
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Header avec motif de feuilles */
+        /* Masquer le contenu principal avant authentification */
+        #main-content {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Header élégant Jardin Secret */
         header {
             width: 100%;
-            height: 300px;
-            background-color: var(--beige);
+            height: 320px;
+            background-color: var(--color-foret);
             background-image: var(--bg-leaf);
             background-size: cover;
             background-position: center;
@@ -37,29 +60,44 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            box-shadow: 0 5px 20px rgba(84, 123, 141, 0.5);
+            border-bottom: 1px solid var(--color-or);
         }
 
         header::after {
             content: "";
             position: absolute;
-            bottom: 0; width: 100%; height: 50px;
-            background: linear-gradient(transparent, var(--dark));
+            bottom: 0; 
+            width: 100%; 
+            height: 60px;
+            background: linear-gradient(transparent, var(--color-creme));
         }
 
         .logo-main {
-            width: 150px;
+            width: 130px;
             z-index: 2;
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
         }
 
         h1 {
             z-index: 2;
-            color: #000;
-            letter-spacing: 5px;
+            color: var(--color-ivoire);
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            font-size: 24px;
-            margin-top: 20px;
+            font-size: 32px;
+            font-weight: 500;
+            margin-top: 15px;
+            margin-bottom: 0;
+        }
+
+        .subtitle {
+            z-index: 2;
+            color: var(--color-or);
+            font-size: 12px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-top: 5px;
+            font-weight: 400;
         }
 
         /* Grille de navigation */
@@ -69,136 +107,274 @@
             gap: 30px;
             width: 90%;
             max-width: 1200px;
-            margin-top: -40px;
+            margin-top: -30px;
             z-index: 10;
-            padding-bottom: 50px;
+            padding-bottom: 60px;
         }
 
+        /* Style des cartes modernisées */
         .card {
-            background: #053363;
-            border-radius: 12px;
-            padding: 30px;
+            background: var(--color-ivoire);
+            border-radius: 8px;
+            padding: 32px 24px;
             text-align: center;
-            border: 1px solid #0d0933;
-            transition: all 0.3s ease;
+            border: 1px solid var(--color-border);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-decoration: none;
-            color: white;
+            color: var(--color-nuit);
+            position: relative;
         }
 
         .card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 10px 30px rgba(1, 183, 219, 0.2);
-        }
-
-        /* Effet d'enfoncement au clic */
-        .card:active {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(1, 183, 219, 0.1);
+            transform: translateY(-4px);
+            border-color: var(--color-or);
+            background-color: #ffffff;
+            box-shadow: 0 12px 24px rgba(5, 55, 22, 0.06);
         }
 
         .card-icon {
-            width: 60px;
-            height: 60px;
-            background: var(--primary);
+            width: 54px;
+            height: 54px;
+            background: transparent;
+            border: 1.5px solid var(--color-foret);
             border-radius: 50%;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 22px;
+            color: var(--color-foret);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover .card-icon {
+            background: var(--color-foret);
+            color: var(--color-ivoire);
         }
 
         .card h3 {
-            margin: 10px 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            margin: 8px 0;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--color-foret);
+            letter-spacing: 0.02em;
         }
 
         .card p {
             font-size: 14px;
-            color: #888;
-            line-height: 1.5;
+            color: rgba(30, 30, 30, 0.75);
+            line-height: 1.6;
+            margin: 8px 0 16px 0;
+            font-weight: 300;
         }
 
         .badge {
-            background: var(--primary);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
+            margin-top: auto;
+            border: 1px solid var(--color-or);
+            color: var(--color-foret);
+            background-color: transparent;
+            padding: 3px 10px;
+            border-radius: 4px;
             font-size: 10px;
-            margin-top: 15px;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* Fenêtre de connexion (Modal) */
+        .login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 55, 22, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: var(--color-creme);
+            border: 1px solid var(--color-or);
+            border-radius: 8px;
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .login-box h2 {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            color: var(--color-foret);
+            font-size: 28px;
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+
+        .login-box p {
+            font-size: 13px;
+            color: rgba(30,30,30,0.7);
+            margin-bottom: 24px;
+        }
+
+        .login-box input[type="password"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--color-foret);
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            background: #ffffff;
+            color: var(--color-nuit);
+            outline: none;
+            font-family: 'Jost', sans-serif;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            background: var(--color-foret);
+            border: 1.5px solid var(--color-foret);
+            color: var(--color-ivoire);
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-box button:hover {
+            background: var(--color-or);
+            border-color: var(--color-or);
+        }
+
+        .login-error {
+            color: #b30000;
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <img src="logo-labyrinthe.png" alt="Le Labyrinthe" class="logo-main">
-        <h1>Brand Station</h1>
-    </header>
-
-    <div class="hub-grid">
-        <a href="studio-labels.html" class="card">
-            <div class="card-icon">🏷️</div>
-            <h3>Étiquettes présentoir Dosettes</h3>
-            <p>Générateur pour le présentoir à dosettes. Gestion du logo et des motifs.</p>
-            <div class="badge">ACTIF</div>
-        </a>
-
-        <a href="price.html" class="card">
-            <div class="card-icon">💰</div>
-            <h3>Étiquettes Prix</h3>
-            <p>Format 30x70mm pour la boutique. Calcul automatique du prix au kilo.</p>
-            <div class="badge">ACTIF</div>
-        </a>
-
-        <a href="color.html" class="card">
-            <div class="card-icon">🎨</div>
-            <h3>PALETTE DE COULEURS DU LABYRINTHE</h3>
-            <p>Charte graphique et codes couleurs officiels du Labyrinthe.</p>
-            <div class="badge">ACTIF</div>
-        </a>
-
-        <a href="visual-grid.html" class="card">
-            <div class="card-icon">📱</div>
-            <h3>GRILLE INSTAGRAM</h3>
-            <p>Prévisualisation du feed et de la cohérence visuelle.</p>
-            <div class="badge">ACTIF</div>
-        </a>
-
-        <a href="petits-sables.html" class="card">
-            <div class="card-icon">🍪</div>
-            <h3>Sachets 1 sablé</h3>
-            <p>Étiquettes pour 1 sablé.</p>
-            <div class="badge">ACTIF</div>
-        </a>
-
-        <a href="https://capable-moonbeam-5258a4.netlify.app/" target="_blank" class="card">
-            <div class="card-icon">🎟️</div>
-            <h3>Billets d'entrée</h3>
-            <p>Pour créer ou valider des entrées gratuites.</p>
-            <div class="badge">ACTIF</div>
-        </a>
-
-        <a href="https://labyrinthe-en-champ-the.github.io/orga-2026/" target="_blank" class="card">
-            <div class="card-icon">📅</div>
-            <h3>Organisation 2026</h3>
-            <p>Outil d'organisation et de planification pour l'année 2026.</p>
-            <div class="badge">ACTIF</div>
-        </a>
-
-        <a href="https://inesguichard974-cyber.github.io/mon-site-revendeurs/" target="_blank" class="card">
-            <div class="card-icon">🏬</div>
-            <h3>Espace Revendeurs</h3>
-            <p>Gestion et informations dédiées au réseau de revendeurs.</p>
-            <div class="badge">ACTIF</div>
-        </a>
+    <!-- Fenêtre d'authentification -->
+    <div id="login-overlay" class="login-overlay">
+        <div class="login-box">
+            <h2>Brand Station</h2>
+            <p>Accès réservé — Veuillez saisir le mot de passe</p>
+            <form onsubmit="verifierMotDePasse(event)">
+                <input type="password" id="password-input" placeholder="Mot de passe" required autocomplete="current-password">
+                <button type="submit">Se connecter</button>
+            </form>
+            <div id="login-error" class="login-error">Mot de passe incorrect</div>
+        </div>
     </div>
 
+    <!-- Contenu protégé -->
+    <div id="main-content">
+        <header>
+            <img src="logo-labyrinthe.png" alt="Le Labyrinthe" class="logo-main">
+            <h1>Brand Station</h1>
+            <div class="subtitle">En Champ' Thé · Jardin Secret</div>
+        </header>
+
+        <div class="hub-grid">
+            <a href="studio-labels.html" class="card">
+                <div class="card-icon">🏷️</div>
+                <h3>Étiquettes présentoir Dosettes</h3>
+                <p>Générateur pour le présentoir à dosettes. Gestion du logo et des motifs.</p>
+                <div class="badge">Actif</div>
+            </a>
+
+            <a href="price.html" class="card">
+                <div class="card-icon">💰</div>
+                <h3>Étiquettes Prix</h3>
+                <p>Format 30x70mm pour la boutique. Calcul automatique du prix au kilo.</p>
+                <div class="badge">Actif</div>
+            </a>
+
+            <a href="color.html" class="card">
+                <div class="card-icon">🎨</div>
+                <h3>Palette de couleurs</h3>
+                <p>Charte graphique et codes couleurs officiels du Labyrinthe.</p>
+                <div class="badge">Actif</div>
+            </a>
+
+            <a href="visual-grid.html" class="card">
+                <div class="card-icon">📱</div>
+                <h3>Grille Instagram</h3>
+                <p>Prévisualisation du feed et de la cohérence visuelle.</p>
+                <div class="badge">Actif</div>
+            </a>
+
+            <a href="petits-sables.html" class="card">
+                <div class="card-icon">🍪</div>
+                <h3>Sachets 1 sablé</h3>
+                <p>Étiquettes d'emballage pour 1 sablé.</p>
+                <div class="badge">Actif</div>
+            </a>
+
+            <a href="https://capable-moonbeam-5258a4.netlify.app/" target="_blank" class="card">
+                <div class="card-icon">🎟️</div>
+                <h3>Billets d'entrée</h3>
+                <p>Pour créer ou valider des entrées gratuites.</p>
+                <div class="badge">Actif</div>
+            </a>
+
+            <a href="https://labyrinthe-en-champ-the.github.io/orga-2026/" target="_blank" class="card">
+                <div class="card-icon">📅</div>
+                <h3>Organisation 2026</h3>
+                <p>Outil d'organisation et de planification pour l'année 2026.</p>
+                <div class="badge">Actif</div>
+            </a>
+
+            <a href="https://inesguichard974-cyber.github.io/mon-site-revendeurs/" target="_blank" class="card">
+                <div class="card-icon">🏬</div>
+                <h3>Espace Revendeurs</h3>
+                <p>Gestion et informations dédiées au réseau de revendeurs.</p>
+                <div class="badge">Actif</div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const MOT_DE_PASSE = 'labyrinthe2026'; // Changez le mot de passe ici
+        const AUTH_KEY = 'brand_station_authenticated';
+
+        function verifierAcces() {
+            const isAuth = localStorage.getItem(AUTH_KEY);
+            if (isAuth === 'true') {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('main-content').style.display = 'flex';
+            }
+        }
+
+        function verifierMotDePasse(e) {
+            e.preventDefault();
+            const input = document.getElementById('password-input').value;
+            const errorElement = document.getElementById('login-error');
+
+            if (input === MOT_DE_PASSE) {
+                localStorage.setItem(AUTH_KEY, 'true');
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('main-content').style.display = 'flex';
+            } else {
+                errorElement.style.display = 'block';
+            }
+        }
+
+        // Vérification automatique au chargement
+        verifierAcces();
+    </script>
 </body>
 </html>
