@@ -10,16 +10,18 @@
     <!-- Polices officielles de la charte : Cormorant Garamond & Jost -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
         :root {
             --color-foret: #053716;
+            --color-foret-light: #0a4f22;
             --color-or: #B2984F;
-            --color-ivoire: #E5E7DF;
-            --color-creme: #F5F3EE;
+            --color-creme: #F8F7F4;
             --color-nuit: #1E1E1E;
-            --color-border: rgba(178, 152, 79, 0.25);
+            --color-text-muted: #555555;
+            --color-card-bg: #FFFFFF;
+            --color-border: #E2DFD7;
             --bg-leaf: url('fond-motif.png');
         }
 
@@ -47,12 +49,12 @@
             align-items: center;
         }
 
-        /* Header élégant Jardin Secret */
+        /* En-tête sombre pour un contraste parfait */
         header {
             width: 100%;
-            height: 320px;
+            padding: 50px 20px 80px 20px;
             background-color: var(--color-foret);
-            background-image: var(--bg-leaf);
+            background-image: linear-gradient(rgba(5, 55, 22, 0.85), rgba(5, 55, 22, 0.95)), var(--bg-leaf);
             background-size: cover;
             background-position: center;
             display: flex;
@@ -60,129 +62,119 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            border-bottom: 1px solid var(--color-or);
-        }
-
-        header::after {
-            content: "";
-            position: absolute;
-            bottom: 0; 
-            width: 100%; 
-            height: 60px;
-            background: linear-gradient(transparent, var(--color-creme));
+            text-align: center;
         }
 
         .logo-main {
-            width: 130px;
-            z-index: 2;
-            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
+            width: 110px;
+            height: auto;
+            margin-bottom: 15px;
+            filter: brightness(0) invert(1); /* Rend le logo blanc s'il est noir */
         }
 
         h1 {
-            z-index: 2;
-            color: var(--color-ivoire);
+            color: #FFFFFF;
             font-family: 'Cormorant Garamond', Georgia, serif;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.15em;
             text-transform: uppercase;
-            font-size: 32px;
-            font-weight: 500;
-            margin-top: 15px;
-            margin-bottom: 0;
+            font-size: 34px;
+            font-weight: 600;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .subtitle {
-            z-index: 2;
             color: var(--color-or);
-            font-size: 12px;
-            letter-spacing: 0.15em;
+            font-size: 13px;
+            letter-spacing: 0.25em;
             text-transform: uppercase;
-            margin-top: 5px;
-            font-weight: 400;
+            margin-top: 8px;
+            font-weight: 500;
         }
 
         /* Grille de navigation */
         .hub-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 24px;
             width: 90%;
             max-width: 1200px;
-            margin-top: -30px;
+            margin-top: -40px;
             z-index: 10;
             padding-bottom: 60px;
         }
 
-        /* Style des cartes modernisées */
+        /* Cartes Blanches Lumineuses & Haut Contraste */
         .card {
-            background: var(--color-ivoire);
-            border-radius: 8px;
+            background: var(--color-card-bg);
+            border-radius: 12px;
             padding: 32px 24px;
             text-align: center;
             border: 1px solid var(--color-border);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-decoration: none;
             color: var(--color-nuit);
-            position: relative;
         }
 
         .card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-5px);
             border-color: var(--color-or);
-            background-color: #ffffff;
-            box-shadow: 0 12px 24px rgba(5, 55, 22, 0.06);
+            box-shadow: 0 12px 30px rgba(5, 55, 22, 0.1);
         }
 
         .card-icon {
-            width: 54px;
-            height: 54px;
-            background: transparent;
-            border: 1.5px solid var(--color-foret);
+            width: 60px;
+            height: 60px;
+            background: #F4F6F3;
+            border: 1px solid #E0E6DF;
             border-radius: 50%;
-            margin-bottom: 18px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
-            color: var(--color-foret);
+            font-size: 24px;
             transition: all 0.3s ease;
         }
 
         .card:hover .card-icon {
             background: var(--color-foret);
-            color: var(--color-ivoire);
+            color: #FFFFFF;
+            border-color: var(--color-foret);
+            transform: scale(1.05);
         }
 
         .card h3 {
-            margin: 8px 0;
+            margin: 0 0 10px 0;
             font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 600;
             color: var(--color-foret);
-            letter-spacing: 0.02em;
+            letter-spacing: 0.01em;
         }
 
         .card p {
             font-size: 14px;
-            color: rgba(30, 30, 30, 0.75);
+            color: var(--color-text-muted);
             line-height: 1.6;
-            margin: 8px 0 16px 0;
-            font-weight: 300;
+            margin: 0 0 20px 0;
+            font-weight: 400;
         }
 
         .badge {
             margin-top: auto;
             border: 1px solid var(--color-or);
             color: var(--color-foret);
-            background-color: transparent;
-            padding: 3px 10px;
-            border-radius: 4px;
+            background-color: rgba(178, 152, 79, 0.08);
+            padding: 4px 14px;
+            border-radius: 20px;
             font-size: 10px;
-            font-weight: 500;
-            letter-spacing: 0.1em;
+            font-weight: 600;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
         }
 
@@ -190,7 +182,7 @@
         .login-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 55, 22, 0.85);
+            background: rgba(5, 55, 22, 0.92);
             backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
@@ -199,67 +191,73 @@
         }
 
         .login-box {
-            background: var(--color-creme);
+            background: #FFFFFF;
             border: 1px solid var(--color-or);
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 40px;
             width: 90%;
             max-width: 400px;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
 
         .login-box h2 {
             font-family: 'Cormorant Garamond', Georgia, serif;
             color: var(--color-foret);
-            font-size: 28px;
+            font-size: 30px;
             margin-top: 0;
             margin-bottom: 8px;
         }
 
         .login-box p {
-            font-size: 13px;
-            color: rgba(30,30,30,0.7);
+            font-size: 14px;
+            color: var(--color-text-muted);
             margin-bottom: 24px;
         }
 
         .login-box input[type="password"] {
             width: 100%;
             padding: 12px 16px;
-            border: 1.5px solid var(--color-foret);
-            border-radius: 4px;
-            font-size: 14px;
+            border: 1.5px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 15px;
             margin-bottom: 16px;
-            background: #ffffff;
+            background: #FAFAFA;
             color: var(--color-nuit);
             outline: none;
             font-family: 'Jost', sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        .login-box input[type="password"]:focus {
+            border-color: var(--color-foret);
+            background: #FFFFFF;
         }
 
         .login-box button {
             width: 100%;
             padding: 12px;
             background: var(--color-foret);
-            border: 1.5px solid var(--color-foret);
-            color: var(--color-ivoire);
-            border-radius: 4px;
+            border: none;
+            color: #FFFFFF;
+            border-radius: 6px;
             font-size: 13px;
-            font-weight: 500;
-            letter-spacing: 0.1em;
+            font-weight: 600;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .login-box button:hover {
-            background: var(--color-or);
-            border-color: var(--color-or);
+            background: var(--color-foret-light);
+            box-shadow: 0 4px 12px rgba(5, 55, 22, 0.2);
         }
 
         .login-error {
-            color: #b30000;
-            font-size: 12px;
-            margin-top: 10px;
+            color: #d93025;
+            font-size: 13px;
+            margin-top: 12px;
             display: none;
         }
     </style>
